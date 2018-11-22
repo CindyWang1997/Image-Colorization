@@ -1,19 +1,19 @@
 # colorNet-pytorch
 A Neural Network For Automatic Image Colorization
 
-This project is a PyTorch version of the [ColorNet](http://hi.cs.waseda.ac.jp/~iizuka/projects/colorization/en/) issued on SIGGRAPH 2016. Please check out the original website for the details.
+This repository implements a neural network for image colorization for the final project of the class [Computer Vision](http://www.cs.columbia.edu/~vondrick/class/vision-fa18/). The code is adapted from the [PyTorch version](https://github.com/shufanwu/colorNet-pytorch) of the [ColorNet](http://hi.cs.waseda.ac.jp/~iizuka/projects/colorization/en/) issued on SIGGRAPH 2016. 
 
 ## Overview
 * Net model
 ![...](https://github.com/shufanwu/colorNet-pytorch/blob/master/readme%20images/model.png)
 
 * DataSet
-[MIT Places205](http://places.csail.mit.edu/user/index.php)  
-> Hint: For there are grayscale images in the dataset, I write a script to remove these images
+[MIT Places365-Standard](http://places2.csail.mit.edu/download.html)  
+
 
 * Development Environment  
-Python 3.5.1  
-CUDA 8.0  
+Python 3.5.2
+CUDA 9.0  
 
 ## Result
 I just train this model for 3 epochs while 11 epochs in the paper， so I think it will work better if train it more.
