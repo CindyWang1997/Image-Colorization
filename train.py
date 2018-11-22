@@ -85,5 +85,5 @@ def train(epoch):
         torch.save(color_model.state_dict(), 'colornet_params.pkl')
 
 
-for epoch in range(2, epochs + 1):
+for epoch in range(1, epochs + 1):
     train(epoch)
