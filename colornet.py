@@ -1,6 +1,10 @@
 import torch.nn as nn
 import torch.nn.functional as F
 import torch
+from models.custom_layers.trainable_layers import *
+from torch.autograd import Variable
+
+have_cuda = torch.cuda.is_available()
 
 
 class LowLevelFeatNet(nn.Module):
@@ -96,20 +100,20 @@ class ClassificationNet(nn.Module):
         return x
 
 
-class ColorizationNet(nn.Module):
+class FusionNet(nn.Module):
     def __init__(self):
-        super(ColorizationNet, self).__init__()
+        super(FusionNet, self).__init__()
         self.fc1 = nn.Linear(512, 256)
         self.bn1 = nn.BatchNorm1d(256)
-        self.conv1 = nn.Conv2d(256, 128, kernel_size=3, stride=1, padding=1)
-        self.bn2 = nn.BatchNorm2d(128)
-        self.conv2 = nn.Conv2d(128, 64, kernel_size=3, stride=1, padding=1)
-        self.bn3 = nn.BatchNorm2d(64)
-        self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
-        self.bn4 = nn.BatchNorm2d(64)
-        self.conv4 = nn.Conv2d(64, 32, kernel_size=3, stride=1, padding=1)
-        self.bn5 = nn.BatchNorm2d(32)
-        self.conv5 = nn.Conv2d(32, 2, kernel_size=3, stride=1, padding=1)
+        self.conv1 = nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1)
+        self.bn2 = nn.BatchNorm2d(256)
+        self.conv2 = nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1)
+        self.bn3 = nn.BatchNorm2d(256)
+        # self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
+        # self.bn4 = nn.BatchNorm2d(64)
+        # self.conv4 = nn.Conv2d(64, 32, kernel_size=3, stride=1, padding=1)
+        # self.bn5 = nn.BatchNorm2d(32)
+        # self.conv5 = nn.Conv2d(32, 2, kernel_size=3, stride=1, padding=1)
         self.upsample = nn.UpsamplingNearest2d(scale_factor=2)
 
     def forward(self, mid_input, global_input):
@@ -124,13 +128,30 @@ class ColorizationNet(nn.Module):
 
         x = fusion_layer.permute(2, 3, 0, 1).contiguous()
         x = F.relu(self.bn2(self.conv1(x)))
-        x = self.upsample(x)
+        # x = self.upsample(x)
         x = F.relu(self.bn3(self.conv2(x)))
-        x = F.relu(self.bn4(self.conv3(x)))
+        # x = F.relu(self.bn4(self.conv3(x)))
         x = self.upsample(x)
-        x = F.sigmoid(self.bn5(self.conv4(x)))
-        x = self.upsample(self.conv5(x))
+        # x = F.sigmoid(self.bn5(self.conv4(x)))
+        # x = self.upsample(self.conv5(x))
         return x
+
+def conv( in_c, out_c,blocks, strides,  kernel_size=3,batchNorm=True, bias=True):
+
+    model = []
+    assert len(strides) == blocks
+
+    for i in range(blocks):
+        model += [nn.Conv2d(in_c, out_c, kernel_size=kernel_size, stride=strides[i], padding=(kernel_size-1)//2, bias=bias),
+            nn.ReLU()]
+        in_c = out_c
+
+    if batchNorm:
+        model += [nn.BatchNorm2d(out_c)]
+        return nn.Sequential(*model)
+
+    else:
+        return nn.Sequential(*model)
 
 
 class ColorNet(nn.Module):
@@ -140,10 +161,19 @@ class ColorNet(nn.Module):
         self.mid_lv_feat_net = MidLevelFeatNet()
         self.global_feat_net = GlobalFeatNet()
         self.class_net = ClassificationNet()
-        self.upsample_col_net = ColorizationNet()
+        self.upsample_col_net = FusionNet()
+        self.nnecnclayer = NNEncLayer()
+        self.priorboostlayer = PriorBoostLayer()
+        self.nongraymasklayer = NonGrayMaskLayer()
+        self.rebalancelayer = Rebalance_Op.apply
+        self.pool = nn.AvgPool2d(4,4)
+        self.upsample = nn.Upsample(scale_factor=4)
+        self.conv_8 = conv(256,256,2,[1,1], batchNorm=False)
+        self.conv313 = nn.Conv2d(256,313,1,1)
 
-    def forward(self, x1, x2):
-        x1, x2 = self.low_lv_feat_net(x1, x2)
+
+    def forward(self, x_1, x_2, img_ab):
+        x1, x2 = self.low_lv_feat_net(x_1, x_2)
         #print('after low_lv, mid_input is:{}, global_input is:{}'.format(x1.size(), x2.size()))
         x1 = self.mid_lv_feat_net(x1)
         #print('after mid_lv, mid2fusion_input is:{}'.format(x1.size()))
@@ -151,6 +181,30 @@ class ColorNet(nn.Module):
         #print('after global_lv, class_input is:{}, global2fusion_input is:{}'.format(class_input.size(), x2.size()))
         class_output = self.class_net(class_input)
         #print('after class_lv, class_output is:{}'.format(class_output.size()))
-        output = self.upsample_col_net(x1, x2)
+        fusion = self.upsample_col_net(x1, x2)
         #print('after upsample_lv, output is:{}'.format(output.size()))
-        return class_output, output
+        x = self.conv_8(fusion)
+        gen = self.conv313(x)
+
+        # ************ probability distribution step **************
+        gt_img_ab = self.pool(img_ab).cpu().data.numpy()
+        enc = self.nnecnclayer(gt_img_ab)
+        ngm = self.nongraymasklayer(gt_img_ab)
+        pb = self.priorboostlayer(enc)
+        boost_factor = (pb * ngm).astype('float32')
+        if have_cuda:
+            boost_factor = Variable(torch.from_numpy(boost_factor).cuda())
+        else:
+            boost_factor = Variable(torch.from_numpy(boost_factor))
+
+        wei_output = self.rebalancelayer(gen, boost_factor)
+        if self.training:
+            if have_cuda:
+                return class_output, wei_output, Variable(torch.from_numpy(enc).cuda())
+            else:
+                return class_output, wei_output, Variable(torch.from_numpy(enc))
+        else:
+            if have_cuda:
+                return self.upsample(gen), wei_output, Variable(torch.from_numpy(enc).cuda())
+            else:
+                return self.upsample(gen), wei_output, Variable(torch.from_numpy(enc))

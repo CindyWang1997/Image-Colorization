@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 
 
 data_dir = "places365_standard/val"
+gamut = np.load('models/custom_layers/pts_in_hull.npy')
 have_cuda = torch.cuda.is_available()
 
 val_set = ValImageFolder(data_dir)
@@ -29,7 +30,8 @@ else:
 
 def val():
     color_model.eval()
-
+    softmax_op = torch.nn.Softmax()
+    
     i = 0
     for data, _ in val_loader:
         original_img = data[0].unsqueeze(1).float()
@@ -41,26 +43,35 @@ def val():
         w = original_img.size()[2]
         h = original_img.size()[3]
         scale_img = data[1].unsqueeze(1).float()
+        img_ab = data[2].float()
         if have_cuda:
-            original_img, scale_img = original_img.cuda(), scale_img.cuda()
+            original_img, scale_img, img_ab = original_img.cuda(), scale_img.cuda(), img_ab.cuda()
 
         original_img, scale_img = Variable(original_img, volatile=True), Variable(scale_img)
-        _, output = color_model(original_img, scale_img)
-        color_img = torch.cat((original_img, output[:, :, 0:w, 0:h]), 1)
-        color_img = color_img.data.cpu().numpy().transpose((0, 2, 3, 1))
-        for img in color_img:
-            img[:, :, 0:1] = img[:, :, 0:1] * 100
-            img[:, :, 1:3] = img[:, :, 1:3] * 255 - 128
-            img = img.astype(np.float64)
-            img = lab2rgb(img)
+        output_img, output, target = color_model(original_img, scale_img, img_ab)
+
+        output_img *= 2.606
+        output_img = softmax_op(output_img).cpu().data.numpy()
+        fac_a = gamut[:,0][np.newaxis,:,np.newaxis,np.newaxis]
+        fac_b = gamut[:,1][np.newaxis,:,np.newaxis,np.newaxis]
+        img_l = original_img.cpu().data.numpy().transpose(0,2,3,1)
+        frs_pred_ab = np.concatenate((np.sum(output_img * fac_a, axis=1, keepdims=True), np.sum(output_img * fac_b, axis=1, keepdims=True)), axis=1).transpose(0,2,3,1)
+
+        frs_predic_imgs = np.concatenate((img_l, frs_pred_ab ), axis = 3)
+        for img in frs_predic_imgs:
             color_name = './colorimg/' + str(i) + '.jpg'
             plt.imsave(color_name, img)
             i += 1
-        # use the follow method can't get the right image but I don't know why
-        # color_img = torch.from_numpy(color_img.transpose((0, 3, 1, 2)))
-        # sprite_img = make_grid(color_img)
-        # color_name = './colorimg/'+str(i)+'.jpg'
-        # save_image(sprite_img, color_name)
-        # i += 1
+            
+        # color_img = torch.cat((original_img, output[:, :, 0:w, 0:h]), 1)
+        # color_img = color_img.data.cpu().numpy().transpose((0, 2, 3, 1))
+        # for img in color_img:
+        #     img[:, :, 0:1] = img[:, :, 0:1] * 100
+        #     img[:, :, 1:3] = img[:, :, 1:3] * 255 - 128
+        #     img = img.astype(np.float64)
+        #     img = lab2rgb(img)
+        #     color_name = './colorimg/' + str(i) + '.jpg'
+        #     plt.imsave(color_name, img)
+        #     i += 1
 
 val()

@@ -33,7 +33,7 @@ def val():
     i = 0
     for data, _ in val_loader:
         original_img = data[0].unsqueeze(1).float()
-        gray_name = './gray/' + str(i) + '.jpg'
+        gray_name = './gray_baseline/' + str(i) + '.jpg'
         for img in original_img:
             pic = img.squeeze().numpy()
             pic = pic.astype(np.float64)
@@ -53,7 +53,7 @@ def val():
             img[:, :, 1:3] = img[:, :, 1:3] * 255 - 128
             img = img.astype(np.float64)
             img = lab2rgb(img)
-            color_name = './colorimg/' + str(i) + '.jpg'
+            color_name = './colorimg_baseline/' + str(i) + '.jpg'
             plt.imsave(color_name, img)
             i += 1
         # use the follow method can't get the right image but I don't know why

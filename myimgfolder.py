@@ -57,9 +57,9 @@ class TrainImageFolder(datasets.ImageFolder):
             img_original = np.asarray(img_original)
 
             img_lab = rgb2lab(img_original)
-            img_lab = (img_lab + 128) / 255
+            # img_lab = (img_lab + 128) / 255
             img_ab = img_lab[:, :, 1:3]
-            img_ab = torch.from_numpy(img_ab.transpose((2, 0, 1)))
+            img_ab = torch.from_numpy(img_ab.transpose((2, 0, 1)).astype(np.float32))
             img_original = rgb2gray(img_original)
             img_original = torch.from_numpy(img_original)
         if self.target_transform is not None:
@@ -74,6 +74,12 @@ class ValImageFolder(datasets.ImageFolder):
 
         img_scale = img.copy()
         img_original = img
+
+        img_lab = rgb2lab(img_original)
+        # img_lab = (img_lab + 128) / 255
+        img_ab = img_lab[:, :, 1:3]
+        img_ab = torch.from_numpy(img_ab.transpose((2, 0, 1)).astype(np.float32))
+
         img_scale = scale_transform(img_scale)
 
         img_scale = np.asarray(img_scale)
@@ -83,4 +89,4 @@ class ValImageFolder(datasets.ImageFolder):
         img_scale = torch.from_numpy(img_scale)
         img_original = rgb2gray(img_original)
         img_original = torch.from_numpy(img_original)
-        return (img_original, img_scale), target
+        return (img_original, img_scale, img_ab), target

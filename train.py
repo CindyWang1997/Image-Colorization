@@ -10,9 +10,10 @@ import numpy as np
 
 from myimgfolder import TrainImageFolder
 from colornet import ColorNet
+from loss import CE_loss
 
 original_transform = transforms.Compose([
-    transforms.Scale(256),
+    transforms.Resize(256),
     transforms.RandomCrop(224),
     transforms.RandomHorizontalFlip(),
     #transforms.ToTensor()
@@ -55,17 +56,18 @@ def train(epoch):
             img_ab = Variable(img_ab)
             classes = Variable(classes)
             optimizer.zero_grad()
-            class_output, output = color_model(original_img, original_img)
-            if have_cuda:
-                ems_loss = torch.pow((img_ab - output), 2).sum() / Variable(torch.from_numpy(np.array(list(output.size()))).cuda()).prod().float()
-            else:
-                ems_loss = torch.pow((img_ab - output), 2).sum() / Variable(torch.from_numpy(np.array(list(output.size())))).prod().float()
-            cross_entropy_loss = 1/300 * F.cross_entropy(class_output, classes)
-            loss = ems_loss + cross_entropy_loss
+            class_output, output, target = color_model(original_img, original_img, img_ab)
+
+            criterion = CE_loss()
+            output_loss = criterion(output, target)
+            class_cross_entropy_loss = 0.5 * F.cross_entropy(class_output, classes)
+            loss = output_loss + class_cross_entropy_loss
+            print ("output_loss: %.9f" %output_loss.item())
+            print ("class_cross_entropy_loss: %.9f" %class_cross_entropy_loss.item())
             lossmsg = 'loss: %.9f\n' % (loss.item())
             messagefile.write(lossmsg)
-            ems_loss.backward(retain_graph=True)
-            cross_entropy_loss.backward()
+            output_loss.backward(retain_graph=True)
+            class_cross_entropy_loss.backward()
             optimizer.step()
             if batch_idx % 500 == 0:
                 message = 'Train Epoch:%d\tPercent:[%d/%d (%.0f%%)]\tLoss:%.9f\n' % (
