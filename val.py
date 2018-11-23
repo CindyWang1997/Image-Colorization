@@ -19,9 +19,12 @@ val_set_size = len(val_set)
 val_loader = torch.utils.data.DataLoader(val_set, batch_size=1, shuffle=False, num_workers=1)
 
 color_model = ColorNet()
-color_model.load_state_dict(torch.load('./pretrained/colornet_params.pkl'))
 if have_cuda:
+    color_model.load_state_dict(torch.load('./pretrained/colornet_params.pkl', ))
     color_model.cuda()
+else:
+    color_model.load_state_dict(torch.load('./pretrained/colornet_params.pkl', map_location='cpu'))
+
 
 
 def val():
