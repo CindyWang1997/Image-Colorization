@@ -8,8 +8,8 @@ from torch.autograd import Variable
 from torchvision import transforms
 import numpy as np
 
-from myimgfolder import TrainImageFolder
-from colornet import ColorNet
+from myimgfolder import TrainImageFolderBaseline
+from colornet_baseline import ColorNet
 
 original_transform = transforms.Compose([
     transforms.Scale(256),
@@ -22,13 +22,13 @@ have_cuda = torch.cuda.is_available()
 epochs = 3
 
 data_dir = "./places365_standard/train/"
-train_set = TrainImageFolder(data_dir, original_transform)
+train_set = TrainImageFolderBaseline(data_dir, original_transform)
 train_set_size = len(train_set)
 train_set_classes = train_set.classes
 train_loader = torch.utils.data.DataLoader(train_set, batch_size=32, shuffle=True, num_workers=4)
 color_model = ColorNet()
-if os.path.exists('./pretrained/colornet_params.pkl'):
-    color_model.load_state_dict(torch.load('./pretrained/colornet_params.pkl'))
+if os.path.exists('./pretrained/colornet_params_baseline.pkl'):
+    color_model.load_state_dict(torch.load('./pretrained/colornet_params_baseline.pkl'))
 if have_cuda:
     color_model.cuda()
 optimizer = optim.Adadelta(color_model.parameters())
@@ -72,7 +72,7 @@ def train(epoch):
                     epoch, batch_idx * 32, len(train_loader.dataset),
                     100. * batch_idx / len(train_loader), loss.item())
                 messagefile.write(message)
-                torch.save(color_model.state_dict(), 'colornet_params_%d.pkl' %epoch)
+                torch.save(color_model.state_dict(), 'colornet_params_baseline_%d.pkl' %epoch)
             messagefile.close()
                 # print('Train Epoch: {}[{}/{}({:.0f}%)]\tLoss: {:.9f}\n'.format(
                 #     epoch, batch_idx * len(data), len(train_loader.dataset),
@@ -82,7 +82,7 @@ def train(epoch):
         logfile.write(traceback.format_exc())
         logfile.close()
     finally:
-        torch.save(color_model.state_dict(), 'colornet_params.pkl')
+        torch.save(color_model.state_dict(), 'colornet_params_baseline.pkl')
 
 
 for epoch in range(1, epochs + 1):
