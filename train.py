@@ -26,8 +26,8 @@ data_dir = "./places365_standard/train/"
 train_set = TrainImageFolder(data_dir, original_transform)
 train_set_size = len(train_set)
 train_set_classes = train_set.classes
-train_loader = torch.utils.data.DataLoader(train_set, batch_size=32, shuffle=True, num_workers=4)
-color_model = ColorNet()
+train_loader = torch.utils.data.DataLoader(train_set, batch_size=64, shuffle=True, num_workers=8)
+color_model = torch.nn.DataParallel(ColorNet())
 if os.path.exists('./pretrained/colornet_params.pkl'):
     color_model.load_state_dict(torch.load('./pretrained/colornet_params.pkl'))
 if have_cuda:
@@ -62,8 +62,8 @@ def train(epoch):
             output_loss = criterion(output, target)
             class_cross_entropy_loss = 0.5 * F.cross_entropy(class_output, classes)
             loss = output_loss + class_cross_entropy_loss
-            print ("output_loss: %.9f" %output_loss.item())
-            print ("class_cross_entropy_loss: %.9f" %class_cross_entropy_loss.item())
+            # print ("output_loss: %.9f" %output_loss.item())
+            # print ("class_cross_entropy_loss: %.9f" %class_cross_entropy_loss.item())
             lossmsg = 'loss: %.9f\n' % (loss.item())
             messagefile.write(lossmsg)
             output_loss.backward(retain_graph=True)

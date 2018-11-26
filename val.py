@@ -19,7 +19,7 @@ val_set = ValImageFolder(data_dir)
 val_set_size = len(val_set)
 val_loader = torch.utils.data.DataLoader(val_set, batch_size=1, shuffle=False, num_workers=1)
 
-color_model = ColorNet()
+color_model = torch.nn.DataParallel(ColorNet())
 if have_cuda:
     color_model.load_state_dict(torch.load('./pretrained/colornet_params.pkl', ))
     color_model.cuda()
