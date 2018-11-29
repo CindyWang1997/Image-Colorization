@@ -20,7 +20,8 @@ original_transform = transforms.Compose([
 ])
 
 have_cuda = torch.cuda.is_available()
-epochs = 3
+start_epoch = 4
+epochs = 5
 
 data_dir = "./places365_standard/train/"
 train_set = TrainImageFolder(data_dir, original_transform)
@@ -87,5 +88,5 @@ def train(epoch):
         torch.save(color_model.state_dict(), 'colornet_params.pkl')
 
 
-for epoch in range(1, epochs + 1):
+for epoch in range(start_epoch, epochs + 1):
     train(epoch)
