@@ -9,6 +9,7 @@ from colornet import ColorNet
 from myimgfolder import ValImageFolder
 import numpy as np
 import matplotlib.pyplot as plt
+from skimage import io
 
 
 data_dir = "places365_standard/val"
@@ -27,6 +28,16 @@ else:
     color_model.load_state_dict(torch.load('./pretrained/colornet_params.pkl', map_location='cpu'))
 
 
+def save_imgs(filename, im):
+    # for index, im in enumerate(tensor):
+        # print(im.shape)
+        # im =np.clip(im.numpy().transpose(1,2,0), -1, 1) 
+    # print (im.shape)
+    # img_rgb_out = lab2rgb(im.astype(np.float64))
+    img_rgb_out = (255*np.clip(lab2rgb(im),0,1)).astype('uint8')
+    # print (img_rgb_out[128][:60])
+    plt.imsave(filename , img_rgb_out, vmin=0, vmax=255 )
+
 
 def val():
     color_model.eval()
@@ -40,13 +51,13 @@ def val():
             pic = img.squeeze().numpy()
             pic = pic.astype(np.float64)
             plt.imsave(gray_name, pic, cmap='gray')
-        w = original_img.size()[2]
-        h = original_img.size()[3]
         scale_img = data[1].unsqueeze(1).float()
         img_ab = data[2].float()
         if have_cuda:
             original_img, scale_img, img_ab = original_img.cuda(), scale_img.cuda(), img_ab.cuda()
-
+        print (scale_img.shape)
+        print (img_ab.shape)
+        print (img_ab)
         original_img, scale_img = Variable(original_img, volatile=True), Variable(scale_img)
         output_img, output, target = color_model(original_img, scale_img, img_ab)
 
@@ -54,12 +65,15 @@ def val():
         output_img = softmax_op(output_img).cpu().data.numpy()
         fac_a = gamut[:,0][np.newaxis,:,np.newaxis,np.newaxis]
         fac_b = gamut[:,1][np.newaxis,:,np.newaxis,np.newaxis]
-        img_l = original_img.cpu().data.numpy().transpose(0,2,3,1)
+        # print (original_img)
+        img_l = (100*original_img).cpu().data.numpy().transpose(0,2,3,1)
         frs_pred_ab = np.concatenate((np.sum(output_img * fac_a, axis=1, keepdims=True), np.sum(output_img * fac_b, axis=1, keepdims=True)), axis=1).transpose(0,2,3,1)
+        print (frs_pred_ab)
 
         frs_predic_imgs = np.concatenate((img_l, frs_pred_ab ), axis = 3)
         for img in frs_predic_imgs:
             color_name = './colorimg/' + str(i) + '.jpg'
+            save_imgs(color_name, img)
             plt.imsave(color_name, img)
             i += 1
             
