@@ -89,4 +89,6 @@ class ValImageFolder(datasets.ImageFolder):
         img_scale = torch.from_numpy(img_scale)
         img_original = rgb2gray(img_original)
         img_original = torch.from_numpy(img_original)
-        return (img_original, img_scale, img_ab), target
+        img_gray = np.array(img_lab).transpose(2,0,1)
+        img_gray = torch.from_numpy(img_gray.astype(np.float32))[:1,:,:]
+        return (img_original, img_scale, img_ab, img_gray), target

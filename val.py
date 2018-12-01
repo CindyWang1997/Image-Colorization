@@ -53,28 +53,28 @@ def val():
             plt.imsave(gray_name, pic, cmap='gray')
         scale_img = data[1].unsqueeze(1).float()
         img_ab = data[2].float()
+        img_gray = data[3].float()
         if have_cuda:
             original_img, scale_img, img_ab = original_img.cuda(), scale_img.cuda(), img_ab.cuda()
-        print (scale_img.shape)
-        print (img_ab.shape)
-        print (img_ab)
+        # print (scale_img.shape)
+        # print (img_ab.shape)
+        # print (img_ab)
         original_img, scale_img = Variable(original_img, volatile=True), Variable(scale_img)
         output_img, output, target = color_model(original_img, scale_img, img_ab)
 
         output_img *= 2.606
         output_img = softmax_op(output_img).cpu().data.numpy()
-        fac_a = gamut[:,0][np.newaxis,:,np.newaxis,np.newaxis]
-        fac_b = gamut[:,1][np.newaxis,:,np.newaxis,np.newaxis]
+        fac_a = gamut[:,0][np.newaxis,:,np.newaxis,np.newaxis]*3
+        fac_b = gamut[:,1][np.newaxis,:,np.newaxis,np.newaxis]*5
         # print (original_img)
-        img_l = (100*original_img).cpu().data.numpy().transpose(0,2,3,1)
+        img_l = (img_gray).cpu().data.numpy().transpose(0,2,3,1)
         frs_pred_ab = np.concatenate((np.sum(output_img * fac_a, axis=1, keepdims=True), np.sum(output_img * fac_b, axis=1, keepdims=True)), axis=1).transpose(0,2,3,1)
-        print (frs_pred_ab)
+        # print (frs_pred_ab)
 
         frs_predic_imgs = np.concatenate((img_l, frs_pred_ab ), axis = 3)
         for img in frs_predic_imgs:
             color_name = './colorimg/' + str(i) + '.jpg'
             save_imgs(color_name, img)
-            plt.imsave(color_name, img)
             i += 1
             
         # color_img = torch.cat((original_img, output[:, :, 0:w, 0:h]), 1)
