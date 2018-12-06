@@ -20,8 +20,8 @@ original_transform = transforms.Compose([
 ])
 
 have_cuda = torch.cuda.is_available()
-start_epoch = 4
-epochs = 5
+start_epoch = 1
+epochs = 3
 
 data_dir = "./places365_standard/train/"
 train_set = TrainImageFolder(data_dir, original_transform)
@@ -61,7 +61,7 @@ def train(epoch):
 
             criterion = CE_loss()
             output_loss = criterion(output, target)
-            class_cross_entropy_loss = 0.5 * F.cross_entropy(class_output, classes)
+            class_cross_entropy_loss = 0.2* F.cross_entropy(class_output, classes)
             loss = output_loss + class_cross_entropy_loss
             # print ("output_loss: %.9f" %output_loss.item())
             # print ("class_cross_entropy_loss: %.9f" %class_cross_entropy_loss.item())
