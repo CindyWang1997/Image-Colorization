@@ -21,7 +21,7 @@ original_transform = transforms.Compose([
 
 have_cuda = torch.cuda.is_available()
 start_epoch = 1
-epochs = 3
+epochs = 2
 
 data_dir = "./places365_standard/train/"
 train_set = TrainImageFolder(data_dir, original_transform)
@@ -47,7 +47,10 @@ def train(epoch):
         for batch_idx, (data, classes) in enumerate(train_loader):
             print ('batch_idx: %d' %batch_idx)
             messagefile = open('./message.txt', 'a')
-            original_img = data[0].unsqueeze(1).float()
+            # original_img = data[0].unsqueeze(1).float()
+            original_img = data[0].float()
+            original_img = (original_img - 50) * 0.02
+
             img_ab = data[1].float()
             if have_cuda:
                 original_img = original_img.cuda()
@@ -57,6 +60,7 @@ def train(epoch):
             img_ab = Variable(img_ab)
             classes = Variable(classes)
             optimizer.zero_grad()
+            # original_img = (original_img - 0.5) * 2
             class_output, output, target = color_model(original_img, original_img, img_ab)
 
             criterion = CE_loss()
