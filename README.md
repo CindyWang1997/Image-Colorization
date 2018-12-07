@@ -14,7 +14,6 @@ CUDA 9.0
 
 
 * Net model
-
 Baseline model: this is the model used by Iizuka et al. which uses a two-stream architecture in which they fuse global and local features.
 ![...](https://github.com/CindyWang1997/Image-Colorization/blob/master/readme%20images/model.png)
 
@@ -23,20 +22,18 @@ Baseline model: this is the model used by Iizuka et al. which uses a two-stream 
 ## Training and Validation
 training from scratch:
 ```shell
+# baseline
 python3 train_baseline.py 
-```
-Or
-```shell
+# new model
 python3 train.py 
 ```
 To resume training from a previous model, simply place the model under pretrained/ and run the same command.
 
 testing and save output images:
 ```shell
+# baseline
 python3 val_baseline.py
-```
-Or
-```shell
+# new model
 python3 val.py
 ```
 
