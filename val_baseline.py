@@ -5,13 +5,14 @@ from torch.autograd import Variable
 from torchvision.utils import make_grid, save_image
 from skimage.color import lab2rgb
 from skimage import io
-from colornet import ColorNet
+from colornet_baseline import ColorNet
 from myimgfolder import ValImageFolderBaseline
 import numpy as np
 import matplotlib.pyplot as plt
 
 
 data_dir = "places365_standard/val"
+# data_dir = "custom_test"
 have_cuda = torch.cuda.is_available()
 
 val_set = ValImageFolderBaseline(data_dir)
