@@ -109,10 +109,10 @@ class FusionNet(nn.Module):
         self.bn2 = nn.BatchNorm2d(256)
         self.conv2 = nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1)
         self.bn3 = nn.BatchNorm2d(256)
-        # self.conv3 = nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1)
-        # self.bn4 = nn.BatchNorm2d(256)
-        #self.conv4 = nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1)
-        # self.bn5 = nn.BatchNorm2d(256)
+        self.conv3 = nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1)
+        self.bn4 = nn.BatchNorm2d(256)
+        self.conv4 = nn.Conv2d(256, 256, kernel_size=3, stride=1, padding=1)
+        self.bn5 = nn.BatchNorm2d(256)
         # self.conv3 = nn.Conv2d(64, 64, kernel_size=3, stride=1, padding=1)
         # self.bn4 = nn.BatchNorm2d(64)
         # self.conv4 = nn.Conv2d(64, 32, kernel_size=3, stride=1, padding=1)
@@ -134,8 +134,8 @@ class FusionNet(nn.Module):
         x = F.relu(self.bn2(self.conv1(x)))
         # x = self.upsample(x)
         x = F.relu(self.bn3(self.conv2(x)))
-        #x = F.relu(self.bn4(self.conv3(x)))
-        # x = F.relu(self.bn5(self.conv4(x)))
+        x = F.relu(self.bn4(self.conv3(x)))
+        x = F.relu(self.bn5(self.conv4(x)))
         x = self.upsample(x)
         # x = F.sigmoid(self.bn5(self.conv4(x)))
         # x = self.upsample(self.conv5(x))
@@ -172,7 +172,8 @@ class ColorNet(nn.Module):
         self.nongraymasklayer = NonGrayMaskLayer()
         self.rebalancelayer = Rebalance_Op.apply
         self.pool = nn.AvgPool2d(4,4)
-        self.upsample = nn.Upsample(scale_factor=4)
+        self.upsample = nn.Upsample(scale_factor=2)
+        # self.upsample = nn.UpsamplingBilinear2d(scale_factor=4)
         self.conv_8 = conv(256,256,2,[1,1], batchNorm=False)
         self.conv313 = nn.Conv2d(256,313,1,1)
 
@@ -210,6 +211,6 @@ class ColorNet(nn.Module):
                 return class_output, wei_output, Variable(torch.from_numpy(enc))
         else:
             if have_cuda:
-                return self.upsample(gen), wei_output, Variable(torch.from_numpy(enc).cuda())
+                return self.upsample(self.upsample(gen)), wei_output, Variable(torch.from_numpy(enc).cuda())
             else:
-                return self.upsample(gen), wei_output, Variable(torch.from_numpy(enc))
+                return self.upsample(self.upsample(gen)), wei_output, Variable(torch.from_numpy(enc))

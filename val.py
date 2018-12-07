@@ -30,13 +30,7 @@ else:
 
 
 def save_imgs(filename, im):
-    # for index, im in enumerate(tensor):
-        # print(im.shape)
-        # im =np.clip(im.numpy().transpose(1,2,0), -1, 1) 
-    # print (im.shape)
-    # img_rgb_out = lab2rgb(im.astype(np.float64))
     img_rgb_out = (255*np.clip(lab2rgb(im),0,1)).astype('uint8')
-    # print (img_rgb_out[128][:60])
     plt.imsave(filename , img_rgb_out, vmin=0, vmax=255 )
 
 
@@ -68,8 +62,8 @@ def val():
 
         output_img *= 2.606
         output_img = softmax_op(output_img).cpu().data.numpy()
-        fac_a = gamut[:,0][np.newaxis,:,np.newaxis,np.newaxis] * 2.4
-        fac_b = gamut[:,1][np.newaxis,:,np.newaxis,np.newaxis] * 2.4
+        fac_a = gamut[:,0][np.newaxis,:,np.newaxis,np.newaxis] * 1.6
+        fac_b = gamut[:,1][np.newaxis,:,np.newaxis,np.newaxis] * 1.6
         # print (original_img)
         img_l = (original_copy).cpu().data.numpy().transpose(0,2,3,1)
         frs_pred_ab = np.concatenate((np.sum(output_img * fac_a, axis=1, keepdims=True), np.sum(output_img * fac_b, axis=1, keepdims=True)), axis=1).transpose(0,2,3,1)
@@ -77,20 +71,9 @@ def val():
 
         frs_predic_imgs = np.concatenate((img_l, frs_pred_ab ), axis = 3)
         for img in frs_predic_imgs:
-            print (img[128][30:80])
+            print ("img: %d" %i)
             color_name = './colorimg/' + str(i) + '.jpg'
             save_imgs(color_name, img)
             i += 1
-            
-        # color_img = torch.cat((original_img, output[:, :, 0:w, 0:h]), 1)
-        # color_img = color_img.data.cpu().numpy().transpose((0, 2, 3, 1))
-        # for img in color_img:
-        #     img[:, :, 0:1] = img[:, :, 0:1] * 100
-        #     img[:, :, 1:3] = img[:, :, 1:3] * 255 - 128
-        #     img = img.astype(np.float64)
-        #     img = lab2rgb(img)
-        #     color_name = './colorimg/' + str(i) + '.jpg'
-        #     plt.imsave(color_name, img)
-        #     i += 1
 
 val()

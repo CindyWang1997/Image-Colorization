@@ -60,7 +60,7 @@ def train(epoch):
             img_ab = Variable(img_ab)
             classes = Variable(classes)
             optimizer.zero_grad()
-            # original_img = (original_img - 0.5) * 2
+
             class_output, output, target = color_model(original_img, original_img, img_ab)
 
             criterion = CE_loss()
