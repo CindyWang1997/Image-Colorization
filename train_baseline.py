@@ -12,7 +12,7 @@ from myimgfolder import TrainImageFolderBaseline
 from colornet_baseline import ColorNet
 
 original_transform = transforms.Compose([
-    transforms.Scale(256),
+    transforms.Resize(256),
     transforms.RandomCrop(224),
     transforms.RandomHorizontalFlip(),
     #transforms.ToTensor()
