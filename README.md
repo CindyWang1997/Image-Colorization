@@ -15,8 +15,10 @@ CUDA 9.0
 
 * Net model
 Baseline model: this is the model used by Iizuka et al. which uses a two-stream architecture in which they fuse global and local features.
-![...](https://github.com/CindyWang1997/Image-Colorization/blob/master/readme%20images/model.png)
+![...](https://github.com/CindyWang1997/Image-Colorization/blob/master/readme%20images/baseline_model.png)
 
+Combined model: this is our proposed model, which is a combination of the model proposed by Iizauka et al. and Zhang et al. It substitutes the colorization network in Iizuka’s model with a network that maps combined features to probability distribution of 313 ab values bins. 
+![...](https://github.com/CindyWang1997/Image-Colorization/blob/master/readme%20images/combined_model.png)
 
 
 ## Training and Validation
