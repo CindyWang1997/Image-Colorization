@@ -61,9 +61,9 @@ def val():
         output_img, output, target = color_model(original_img, scale_img, img_ab)
 
         output_img *= 2.606
-        output_img = softmax_op(output_img).cpu().data.numpy()
-        fac_a = gamut[:,0][np.newaxis,:,np.newaxis,np.newaxis] * 1.6
-        fac_b = gamut[:,1][np.newaxis,:,np.newaxis,np.newaxis] * 1.6
+        output_img = softmax_op(output_img).cpu().data.numpy() 
+        fac_a = gamut[:,0][np.newaxis,:,np.newaxis,np.newaxis] * 1.4
+        fac_b = gamut[:,1][np.newaxis,:,np.newaxis,np.newaxis] * 1.4
         # print (original_img)
         img_l = (original_copy).cpu().data.numpy().transpose(0,2,3,1)
         frs_pred_ab = np.concatenate((np.sum(output_img * fac_a, axis=1, keepdims=True), np.sum(output_img * fac_b, axis=1, keepdims=True)), axis=1).transpose(0,2,3,1)

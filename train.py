@@ -20,8 +20,8 @@ original_transform = transforms.Compose([
 ])
 
 have_cuda = torch.cuda.is_available()
-start_epoch = 1
-epochs = 2
+start_epoch = 2
+epochs = 3
 
 data_dir = "./places365_standard/train/"
 train_set = TrainImageFolder(data_dir, original_transform)
@@ -81,9 +81,7 @@ def train(epoch):
                 messagefile.write(message)
                 torch.save(color_model.state_dict(), 'colornet_params_%d.pkl' %epoch)
             messagefile.close()
-                # print('Train Epoch: {}[{}/{}({:.0f}%)]\tLoss: {:.9f}\n'.format(
-                #     epoch, batch_idx * len(data), len(train_loader.dataset),
-                #     100. * batch_idx / len(train_loader), loss.data[0]))
+
     except Exception:
         logfile = open('log.txt', 'w')
         logfile.write(traceback.format_exc())

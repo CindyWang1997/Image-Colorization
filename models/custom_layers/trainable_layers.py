@@ -124,25 +124,6 @@ class NonGrayMaskLayer(object):
         # if an image has any (a,b) value which exceeds threshold, output 1
         return (np.sum(np.sum(np.sum(np.abs(bottom) > self.thresh,axis=1),axis=1),axis=1) > 0)[:,na(),na(),na()]
 
-class ClassRebalanceMultLayer(torch.nn.Module):
-    ''' INPUTS
-        bottom[0]   NxMxXxY     feature map
-        bottom[1]   Nx1xXxY     boost coefficients
-    OUTPUTS
-        top[0]      NxMxXxY     on forward, gets copied from bottom[0]
-    FUNCTIONALITY
-        On forward pass, top[0] passes bottom[0]
-        On backward pass, bottom[0] gets boosted by bottom[1]
-        through pointwise multiplication (with singleton expansion) '''
-    def __init__(self):
-        super().__init__( )
-    
-    def forward(self, bottom, pp_factor):
-
-        return bottom * pp_factor
-        # top[0].data[...] = bottom[0].data[...]*bottom[1].data[...] # this was bad, would mess up the gradients going up
-
-
 class Rebalance_Op(Function):
     @staticmethod
     def forward(ctx, input, factors):
