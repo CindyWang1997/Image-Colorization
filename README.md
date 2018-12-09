@@ -13,7 +13,7 @@ Python 3.5.2
 CUDA 9.0  
 
 
-* Net model
+* Net model<br />
 Baseline model: this is the model used by Iizuka et al. which uses a two-stream architecture in which they fuse global and local features.
 ![...](https://github.com/CindyWang1997/Image-Colorization/blob/master/readme%20images/baseline_model.png)
 
