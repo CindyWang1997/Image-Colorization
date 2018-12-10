@@ -47,7 +47,7 @@ We trained both the baseline model and the proposed model for 3 epochs which is 
 
 * Comparison with baseline model<br />
 With both models trained for 3 epochs, we note that when the image is anything otherthan outdoor natural sceneries, the baseline model gives dull uniform-colored outputs. Our model has some improvements in this aspect.
-![...](https://github.com/CindyWang1997/Image-Colorization/blob/master/readme%20images/baseline-comparison.png)
+![...](https://github.com/CindyWang1997/Image-Colorization/blob/master/readme%20images/baseline-comparison.png = 500x500)
 
 * Major limitation: unclear borders and color inconsistency<br />
 Although out new model gives more vibrant colors to objects such as aircrafts, cars and other man-made objects, those colors are not very connsistent with the borders. Sometimes the vibrant colors (e.g. red of the car) extend outside the borders and other times it does not colorize the individual object entirely (e.g. the fish). This may be improved by adopting better segmentation methods and down/up sampling strategies.
