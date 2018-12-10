@@ -43,7 +43,7 @@ python3 val.py
 We trained both the baseline model and the proposed model for 3 epochs which is far fewer than those trained in both papers, so we expect it to work better if train it more.
 
 * Results using our proposed model
-![...](https://github.com/CindyWang1997/Image-Colorization/blob/master/readme%20images/colorization-results.png)  
+![...](https://github.com/CindyWang1997/Image-Colorization/blob/master/readme%20images/colorization_results.png)  
 
 * Comparison with baseline model<br />
 With both models trained for 3 epochs, we note that when the image is anything otherthan outdoor natural sceneries, the baseline model gives dull uniform-colored outputs. Our model has some improvements in this aspect.
