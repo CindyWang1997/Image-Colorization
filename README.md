@@ -40,12 +40,17 @@ python3 val.py
 ```
 
 ## Result
-I just train this model for 3 epochs while 11 epochs in the paper， so I think it will work better if train it more.
+We trained both the baseline model and the proposed model for 3 epochs which is far fewer than those trained in both papers, so we expect it to work better if train it more.
 
-* Good results  
-![...](https://github.com/shufanwu/colorNet-pytorch/blob/master/readme%20images/good-result.png)  
-* Bad results  
-![...](https://github.com/shufanwu/colorNet-pytorch/blob/master/readme%20images/bad-result.png)  
-For this network is trained by landscape image database, it's work well for scenery pictures. So if you use this network to color  images of other types, maybe you can't get a satisfying output.
+* Results using our proposed model
+![...](https://github.com/CindyWang1997/Image-Colorization/blob/master/readme%20images/colorization-results.png)  
+
+* Comparison with baseline model<br />
+With both models trained for 3 epochs, we note that when the image is anything otherthan outdoor natural sceneries, the baseline model gives dull uniform-colored outputs. Our model has some improvements in this aspect.
+![...](https://github.com/CindyWang1997/Image-Colorization/blob/master/readme%20images/baseline-comparison.png)
+
+* Major limitation: unclear borders and color inconsistency<br />
+Although out new model gives more vibrant colors to objects such as aircrafts, cars and other man-made objects, those colors are not very connsistent with the borders. Sometimes the vibrant colors (e.g. red of the car) extend outside the borders and other times it does not colorize the individual object entirely (e.g. the fish). This may be improved by adopting better segmentation methods and down/up sampling strategies.
+![...](https://github.com/CindyWang1997/Image-Colorization/blob/master/readme%20images/color-inc.png)
 
 
